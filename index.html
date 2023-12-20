@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>YASH | VIRAT </title>
   <style>
 
@@ -29,7 +30,6 @@
     }
 
     /* Add this CSS to your existing style block or create a new one */
-
 /* Style for confetti */
 .confetti {
     position: fixed;
@@ -101,6 +101,39 @@ h3 {
   color: black;
   border-radius: 5px;
 }
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.button{
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+}
+
+#upButton {
+  margin-top: -100px;
+}
+
+#downButton {
+  margin-bottom: -80px;
+  margin-left: -40px;
+}
+
+#shareButton {
+  margin-top: 50px;
+}
+
+
   </style>
 </head>
 <body>
@@ -108,16 +141,24 @@ h3 {
         <div id="game-board"></div>
         <div id="score">Score: <span id="score-value">0</span></div>
         <h3 id="100"></h3>
+        <div class="button">
+          <button id="leftButton"><i class="fas fa-caret-left"></i></button>
+          <button id="upButton"><i class="fas fa-sort-up"></i></button>
+          <button id="downButton"><i class="fas fa-sort-down"></i></button>
+          <button id="rightButton"><i class="fas fa-caret-right"></i></button>
+        </div>
         <button id="shareButton">Share  via What's App</button>
         <audio id="eatSound" src="BC.mp3"></audio>
         <audio id="over" src="over.mp3"></audio>
         <audio id="hundread" src="100.mp3"></audio> <!-- Add your audio file here -->
         <audio id="noFoodAlert" src="Nusk.mp3"></audio>
+        
 
 
 </div>
   
   <script>
+
     const gameBoard = document.getElementById('game-board');
     let snake = [{ x: 10, y: 10 }]; // Adjust initial position
     let food = { x: 5, y: 5 }; // Adjust initial position
@@ -331,6 +372,35 @@ function shareGame() {
 
     const shareButton = document.getElementById('shareButton');
     shareButton.addEventListener('click', shareGame);
+
+    const upButton = document.getElementById('upButton');
+const downButton = document.getElementById('downButton');
+const leftButton = document.getElementById('leftButton');
+const rightButton = document.getElementById('rightButton');
+
+upButton.addEventListener('click', () => {
+  if (direction !== 'down') {
+    direction = 'up';
+  }
+});
+
+downButton.addEventListener('click', () => {
+  if (direction !== 'up') {
+    direction = 'down';
+  }
+});
+
+leftButton.addEventListener('click', () => {
+  if (direction !== 'right') {
+    direction = 'left';
+  }
+});
+
+rightButton.addEventListener('click', () => {
+  if (direction !== 'left') {
+    direction = 'right';
+  }
+});
 
   </script>
 </body>

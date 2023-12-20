@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YASH | VIRAT </title>
+  <style>
+
+    body {
+        background: rgb(193, 0, 255);
+        background: linear-gradient(90deg, rgba(193, 0, 255, 1) 0%, rgba(29, 47, 201, 1) 69%, rgba(255, 0, 253, 1) 100%);
+        color: white;
+    }
+    /* CSS styling for the game */
+    #game-board {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      border: 1px solid #000;
+      display: grid;
+      grid-template-columns: repeat(20, 1fr);
+      grid-template-rows: repeat(20, 1fr);
+      background-color: white;
+    }
+    .snake, .food {
+      width: 130%;
+      height: 130%;
+      background-size: cover;
+    }
+
+    /* Add this CSS to your existing style block or create a new one */
+
+/* Style for confetti */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background-color: #f00; /* Default color, will be overridden */
+    border-radius: 50%;
+    z-index: 100;
+    pointer-events: none;
+    animation: fall linear infinite;
+}
+
+/* Animation for confetti falling */
+@keyframes fall {
+    0% {
+        transform: translateY(-100vh) rotateZ(0deg);
+    }
+    100% {
+        transform: translateY(100vh) rotateZ(360deg);
+    }
+}
+
+h3 {
+    text-align: center;
+    color: #f00;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#game-board {
+    border-radius: 5px;
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 0.5);
+}
+
+#score {
+    margin: 15px;
+  }
+
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+   
+  .container {
+    flex-direction: column;
+    padding: 10px;
+    width: auto;
+  }
+
+  #game-board {
+    margin: 15px;
+    width: 100%;
+  }
+
+  #score {
+    margin: 15px;
+  }
+}
+
+  </style>
+</head>
+<body>
+<div class="container">
+        <div id="game-board"></div>
+        <div id="score">Score: <span id="score-value">0</span></div>
+        <h3 id="100"></h3>
+        <audio id="eatSound" src="BC.mp3"></audio>
+        <audio id="over" src="over.mp3"></audio>
+        <audio id="hundread" src="100.mp3"></audio> <!-- Add your audio file here -->
+</div>
+  
+  <script>
+    const gameBoard = document.getElementById('game-board');
+    let snake = [{ x: 10, y: 10 }]; // Adjust initial position
+    let food = { x: 5, y: 5 }; // Adjust initial position
+    let direction = 'right';
+    let intervalId;
+
+    const scoreElement = document.getElementById('score-value');
+    const century = document.getElementById('100');
+    const hundread = document.getElementById('hundread');
+    let score = 0;
+    const over = document.getElementById('over');
+
+    function updateScore() {
+        score += 10; // Increment the score by 10 whenever food is eaten
+        scoreElement.textContent = score;
+        if (score === 100) {
+        triggerCelebration();
+       }
+    }
+
+
+    function generateFood() {
+      const x = Math.floor(Math.random() * 20);
+      const y = Math.floor(Math.random() * 20);
+      food = { x, y };
+
+      // Play the audio when food is generated
+      const eatSound = document.getElementById('eatSound');
+    }
+
+    function draw() {
+  gameBoard.innerHTML = '';
+
+  snake.forEach((segment, index) => {
+    const snakeElement = document.createElement('div');
+    snakeElement.style.gridRow = segment.y;
+    snakeElement.style.gridColumn = segment.x;
+    snakeElement.classList.add('snake');
+
+    // Set the appearance of the snake segments
+    if (index === 0) {
+      snakeElement.style.background = 'url("king.png")'; // Head image URL
+      snakeElement.style.backgroundSize = 'cover';
+    } else {
+      snakeElement.style.backgroundColor = 'red'; // Blue circle for body segments
+      snakeElement.style.borderRadius = '50%';
+    }
+
+    gameBoard.appendChild(snakeElement);
+  });
+
+  const foodElement = document.createElement('div');
+  foodElement.style.gridRow = food.y;
+  foodElement.style.gridColumn = food.x;
+  foodElement.classList.add('food');
+  foodElement.style.backgroundImage = 'url("gg.jpg")'; // Replace with food image URL
+  gameBoard.appendChild(foodElement);
+}
+
+
+    function moveSnake() {
+      const head = { ...snake[0] };
+      switch (direction) {
+        case 'up':
+          head.y = (head.y - 1 + 20) % 20;
+          break;
+        case 'down':
+          head.y = (head.y + 1) % 20;
+          break;
+        case 'left':
+          head.x = (head.x - 1 + 20) % 20;
+          break;
+        case 'right':
+          head.x = (head.x + 1) % 20;
+          break;
+      }
+
+      snake.unshift(head);
+
+      // Check for collision with food
+      if (head.x === food.x && head.y === food.y) {
+        eatSound.play();
+        generateFood();
+        updateScore();
+      } else {
+        snake.pop();
+      }
+
+      // Check for collision with borders or itself
+      if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || isSnakeCollision(head)) {
+        stopAndResetAudio();
+        over.play();
+        scoreElement.textContent = "0";
+        clearInterval(intervalId); // Game over, stop the interval
+       alert("Game Over!")
+        snake = [{ x: 10, y: 10 }]; // Reset snake position
+        direction = 'right'; // Reset direction
+        generateFood(); // Generate new food
+        intervalId = setInterval(gameLoop, 200); // Restart game loop
+      }
+    }
+
+    // Function to check collision with snake's own body
+    function isSnakeCollision(head) {
+      return snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
+    }
+
+    function gameLoop() {
+      moveSnake();
+      draw();
+    }
+
+
+
+    // Start the game loop
+    generateFood();
+    intervalId = setInterval(gameLoop, 200);
+
+    // Event listener to handle direction changes
+    document.addEventListener('keydown', event => {
+      if ((event.key === 'ArrowUp' || event.key === 'w') && direction !== 'down') {
+        direction = 'up';
+      } else if ((event.key === 'ArrowDown' || event.key === 's') && direction !== 'up') {
+        direction = 'down';
+      } else if ((event.key === 'ArrowLeft' || event.key === 'a') && direction !== 'right') {
+        direction = 'left';
+      } else if ((event.key === 'ArrowRight' || event.key === 'd') && direction !== 'left') {
+        direction = 'right';
+      }
+    });
+
+
+    function triggerCelebration() {
+
+    century.textContent = "Congratulations! You've reached to the century!";
+    hundread.play();
+    // Create confetti elements and add them to the DOM
+    for (let i = 0; i < 100; i++) {
+        createConfetti();
+    }
+    setTimeout(() => {
+        removeCelebration();
+    }, 5000);
+}
+
+function removeCelebration() {
+    const confettiElements = document.querySelectorAll('.confetti');
+    century.textContent = "";
+    confettiElements.forEach(confetti => confetti.remove());
+}
+
+function stopAndResetAudio() {
+    hundread.pause(); // Pause the audio playback
+    hundread.currentTime = 0; // Set the playback time to the beginning
+}
+
+
+function createConfetti() {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * window.innerWidth + 'px';
+    confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+
+    confetti.style.backgroundColor = randomColor(); // Random color for confetti
+
+    document.body.appendChild(confetti);
+
+    // Remove confetti element after animation
+    confetti.addEventListener('animationend', () => {
+        confetti.remove();
+    });
+}
+
+function randomColor() {
+    // Generate a random color in hex format
+    return '#' + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+  </script>
+</body>
+</html>

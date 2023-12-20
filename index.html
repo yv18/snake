@@ -94,6 +94,13 @@ h3 {
   }
 }
 
+#shareButton {
+  padding: 10px;
+  border: none;
+  background-color: #33fe00;
+  color: black;
+  border-radius: 5px;
+}
   </style>
 </head>
 <body>
@@ -101,9 +108,13 @@ h3 {
         <div id="game-board"></div>
         <div id="score">Score: <span id="score-value">0</span></div>
         <h3 id="100"></h3>
+        <button id="shareButton">Share  via What's App</button>
         <audio id="eatSound" src="BC.mp3"></audio>
         <audio id="over" src="over.mp3"></audio>
         <audio id="hundread" src="100.mp3"></audio> <!-- Add your audio file here -->
+        <audio id="noFoodAlert" src="Nusk.mp3"></audio>
+
+
 </div>
   
   <script>
@@ -112,6 +123,8 @@ h3 {
     let food = { x: 5, y: 5 }; // Adjust initial position
     let direction = 'right';
     let intervalId;
+    let timeSinceLastMeal = 0;
+    const noFoodAlert = document.getElementById('noFoodAlert');
 
     const scoreElement = document.getElementById('score-value');
     const century = document.getElementById('100');
@@ -122,10 +135,20 @@ h3 {
     function updateScore() {
         score += 10; // Increment the score by 10 whenever food is eaten
         scoreElement.textContent = score;
+        timeSinceLastMeal = 0;
         if (score === 100) {
         triggerCelebration();
        }
     }
+
+
+    function checkNoFoodAlert() {
+  timeSinceLastMeal += 200; // Increment time by the interval time (200ms in this case)
+  if (timeSinceLastMeal >= 11000) { // Check if 5 seconds (5000ms) have passed
+    noFoodAlert.play();
+    timeSinceLastMeal = 0; // Reset the timer after playing the audio
+  }
+}
 
 
     function generateFood() {
@@ -217,6 +240,7 @@ h3 {
     function gameLoop() {
       moveSnake();
       draw();
+      checkNoFoodAlert();
     }
 
 
@@ -284,6 +308,29 @@ function randomColor() {
     // Generate a random color in hex format
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
+
+
+function shareGame() {
+      const gameURL = window.location.href;
+
+      // Use Web Share API if available
+      if (navigator.share) {
+        navigator.share({
+          title: 'Snake Game',
+          url: gameURL
+        })
+        .then(() => console.log('Game link shared successfully'))
+        .catch((error) => console.error('Error sharing game link:', error));
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(gameURL)
+          .then(() => alert('Game link copied to clipboard!'))
+          .catch((error) => console.error('Could not copy game link:', error));
+      }
+    }
+
+    const shareButton = document.getElementById('shareButton');
+    shareButton.addEventListener('click', shareGame);
 
   </script>
 </body>
